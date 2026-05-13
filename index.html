@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>台南三日遊｜燒烏龜</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      color: #222;
+      background: linear-gradient(180deg, #ffd98a 0%, #fff2c9 46%, #ffb36b 100%);
+    }
+    .bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .sun {
+      position: absolute;
+      top: 5vh;
+      right: 9vw;
+      font-size: clamp(56px, 10vw, 120px);
+      animation: pulse 2.8s infinite ease-in-out;
+    }
+    .lantern {
+      position: absolute;
+      top: 18vh;
+      left: 8vw;
+      font-size: clamp(42px, 8vw, 80px);
+      animation: float 3s infinite ease-in-out;
+    }
+    .noodle {
+      position: absolute;
+      top: 28vh;
+      right: 13vw;
+      font-size: clamp(42px, 8vw, 82px);
+      animation: float 3.4s .5s infinite ease-in-out;
+    }
+    .temple {
+      position: absolute;
+      bottom: 22vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92vw, 780px);
+      height: 120px;
+      border-radius: 40px 40px 0 0;
+      background: rgba(170, 73, 32, .20);
+      box-shadow: 0 -20px 70px rgba(168, 66, 27, .18);
+    }
+    .temple::before {
+      content: "台南古都・三日燃燒中";
+      position: absolute;
+      left: 50%;
+      top: 32px;
+      transform: translateX(-50%);
+      font-weight: 900;
+      letter-spacing: .2em;
+      color: rgba(110, 42, 16, .55);
+      white-space: nowrap;
+    }
+    main {
+      position: relative;
+      z-index: 5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 28px 20px 180px;
+    }
+    .tag {
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      color: #a84412;
+      font-weight: 900;
+      letter-spacing: .26em;
+      font-size: 14px;
+      box-shadow: 0 10px 30px rgba(92,39,12,.18);
+      animation: float 2.4s infinite ease-in-out;
+    }
+    h1 {
+      margin: 24px 0 18px;
+      font-size: clamp(48px, 10vw, 96px);
+      line-height: 1.02;
+      font-weight: 1000;
+      letter-spacing: -0.05em;
+      text-shadow: 0 6px 0 rgba(255,255,255,.45);
+    }
+    h1 span {
+      display: block;
+      font-size: clamp(28px, 5vw, 52px);
+      letter-spacing: 0;
+      margin-top: 8px;
+    }
+    .card {
+      width: min(92vw, 580px);
+      min-height: 185px;
+      padding: 28px 22px;
+      border-radius: 34px;
+      background: rgba(255,255,255,.76);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: 0 26px 70px rgba(100,40,7,.24);
+      backdrop-filter: blur(12px);
+    }
+    .day {
+      font-size: 19px;
+      color: #e65b16;
+      font-weight: 1000;
+    }
+    .date {
+      margin-top: 6px;
+      font-size: clamp(44px, 10vw, 72px);
+      font-weight: 1000;
+      letter-spacing: -0.05em;
+    }
+    .note {
+      margin-top: 14px;
+      font-size: clamp(18px, 4vw, 24px);
+      font-weight: 800;
+      color: #6c3418;
+    }
+    .chips {
+      display: flex;
+      gap: 9px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .chip {
+      padding: 9px 15px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      color: #7b421d;
+      font-weight: 900;
+      box-shadow: 0 8px 20px rgba(99,45,13,.12);
+    }
+    .chip.active {
+      background: #ec6722;
+      color: white;
+    }
+    .caption {
+      margin-top: 28px;
+      padding: 13px 18px;
+      border-radius: 20px;
+      background: rgba(0,0,0,.68);
+      color: white;
+      font-size: clamp(17px, 4vw, 22px);
+      font-weight: 900;
+      box-shadow: 0 18px 40px rgba(0,0,0,.25);
+      animation: pulseSmall 1.2s infinite ease-in-out;
+    }
+    .fire-zone {
+      pointer-events: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      height: 150px;
+      overflow: hidden;
+      background: linear-gradient(0deg, rgba(0,0,0,.48), transparent);
+    }
+    .flame {
+      position: absolute;
+      bottom: -4px;
+      font-size: clamp(48px, 7vw, 82px);
+      animation: burn .9s infinite ease-in-out;
+      transform-origin: bottom center;
+    }
+    .turtle-zone {
+      pointer-events: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 18px;
+      z-index: 28;
+      height: 105px;
+      overflow: hidden;
+    }
+    .turtle {
+      position: absolute;
+      bottom: 22px;
+      font-size: clamp(42px, 7vw, 70px);
+      animation-name: turtleMove, turtleBob, turtleBurn;
+      animation-duration: 8.4s, 1.4s, 8.4s;
+      animation-timing-function: linear, ease-in-out, linear;
+      animation-iteration-count: infinite, infinite, infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); opacity: .9; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    @keyframes pulseSmall {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-9px); }
+    }
+    @keyframes burn {
+      0%,100% { transform: translateY(0) scale(1) rotate(-3deg); }
+      50% { transform: translateY(-12px) scale(1.22) rotate(4deg); }
+    }
+    @keyframes turtleMove {
+      from { left: 110vw; }
+      to { left: -18vw; }
+    }
+    @keyframes turtleBob {
+      0%,100% { transform: translateY(0) rotate(0); }
+      50% { transform: translateY(-9px) rotate(5deg); }
+    }
+    @keyframes turtleBurn {
+      0% { opacity: 1; filter: brightness(1); }
+      55% { opacity: .95; filter: brightness(.9); }
+      82% { opacity: .5; filter: brightness(.45); }
+      100% { opacity: 0; filter: brightness(.18); }
+    }
+    .fade {
+      animation: switchDate .45s ease;
+    }
+    @keyframes switchDate {
+      from { opacity: 0; transform: translateY(24px) scale(.94); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg">
+    <div class="sun">☀️</div>
+    <div class="lantern">🏮</div>
+    <div class="noodle">🍜</div>
+    <div class="temple"></div>
+  </div>
+
+  <main>
+    <div class="tag">TAINAN THREE-DAY TRIP</div>
+    <h1>台南三日遊<span>燒烏龜無限循環版</span></h1>
+
+    <section class="card" id="card">
+      <div class="day" id="day">DAY 1</div>
+      <div class="date" id="date">2026.05.16</div>
+      <div class="note" id="note">抵達台南，古都熱浪開場</div>
+    </section>
+
+    <div class="chips" id="chips"></div>
+    <div class="caption">🐢 日期從 2026/05/16 → 2026/05/18 無限循環 🔥</div>
+  </main>
+
+  <div class="fire-zone" id="fire"></div>
+  <div class="turtle-zone" id="turtles"></div>
+
+  <script>
+    const dates = [
+      { label: "2026.05.16", day: "DAY 1", note: "抵達台南，古都熱浪開場" },
+      { label: "2026.05.17", day: "DAY 2", note: "美食巡禮，火力全開" },
+      { label: "2026.05.18", day: "DAY 3", note: "最後一天，烏龜繼續燒" }
+    ];
+
+    const dayEl = document.getElementById("day");
+    const dateEl = document.getElementById("date");
+    const noteEl = document.getElementById("note");
+    const cardEl = document.getElementById("card");
+    const chipsEl = document.getElementById("chips");
+
+    dates.forEach((d, i) => {
+      const chip = document.createElement("div");
+      chip.className = "chip" + (i === 0 ? " active" : "");
+      chip.textContent = d.label;
+      chipsEl.appendChild(chip);
+    });
+
+    let tick = 0;
+    function updateDate() {
+      const current = dates[tick % dates.length];
+      dayEl.textContent = current.day;
+      dateEl.textContent = current.label;
+      noteEl.textContent = current.note;
+      [...chipsEl.children].forEach((chip, i) => {
+        chip.classList.toggle("active", i === tick % dates.length);
+      });
+      cardEl.classList.remove("fade");
+      void cardEl.offsetWidth;
+      cardEl.classList.add("fade");
+      tick++;
+    }
+    setInterval(updateDate, 1800);
+
+    const fire = document.getElementById("fire");
+    for (let i = 0; i < 22; i++) {
+      const f = document.createElement("div");
+      f.className = "flame";
+      f.textContent = "🔥";
+      f.style.left = (i * 5 - 4) + "%";
+      f.style.animationDelay = ((i % 6) * .11) + "s";
+      f.style.fontSize = (48 + (i % 5) * 8) + "px";
+      fire.appendChild(f);
+    }
+
+    const turtles = document.getElementById("turtles");
+    for (let i = 0; i < 5; i++) {
+      const t = document.createElement("div");
+      t.className = "turtle";
+      t.textContent = "🐢";
+      t.style.animationDelay = (i * 1.25) + "s, " + (i * .2) + "s, " + (i * 1.25) + "s";
+      turtles.appendChild(t);
+    }
+  </script>
+</body>
+</html>
