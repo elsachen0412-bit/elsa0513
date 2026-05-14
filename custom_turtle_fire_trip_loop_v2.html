@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>自訂旅遊｜燒烏龜日期循環</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; overflow: hidden; font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif; color: #222; background: linear-gradient(180deg, #ffd98a 0%, #fff2c9 46%, #ffb36b 100%); }
+    .bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .sun { position: absolute; top: 5vh; right: 9vw; font-size: clamp(56px, 10vw, 120px); animation: pulse 2.8s infinite ease-in-out; }
+            .temple { position: absolute; bottom: 22vh; left: 50%; transform: translateX(-50%); width: min(92vw, 780px); height: 120px; border-radius: 40px 40px 0 0; background: rgba(170,73,32,.20); box-shadow: 0 -20px 70px rgba(168,66,27,.18); }
+    .temple::before { content: attr(data-title); position: absolute; left: 50%; top: 32px; transform: translateX(-50%); font-weight: 900; letter-spacing: .16em; color: rgba(110,42,16,.55); white-space: nowrap; }
+    main { position: relative; z-index: 5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 28px 20px 180px; }
+    .panel { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); width: min(94vw, 720px); z-index: 50; display: grid; grid-template-columns: 1.2fr 1fr 1fr auto; gap: 8px; padding: 10px; border-radius: 20px; background: rgba(255,255,255,.78); box-shadow: 0 12px 34px rgba(90,35,10,.18); backdrop-filter: blur(10px); }
+    input, button { border: 0; border-radius: 14px; padding: 11px 12px; font-family: inherit; font-weight: 800; font-size: 14px; }
+    input { background: rgba(255,255,255,.95); color: #5a260d; outline: 2px solid transparent; }
+    input:focus { outline-color: #ec6722; }
+    button { background: #ec6722; color: white; cursor: pointer; }
+    .tag { padding: 10px 18px; border-radius: 999px; background: rgba(255,255,255,.72); color: #a84412; font-weight: 900; letter-spacing: .22em; font-size: 14px; box-shadow: 0 10px 30px rgba(92,39,12,.18); animation: float 2.4s infinite ease-in-out; }
+    h1 { margin: 24px 0 18px; font-size: clamp(44px, 9vw, 88px); line-height: 1.02; font-weight: 1000; letter-spacing: -0.05em; text-shadow: 0 6px 0 rgba(255,255,255,.45); }
+    h1 span { display: block; font-size: clamp(28px, 5vw, 52px); letter-spacing: 0; margin-top: 8px; }
+    .card { width: min(92vw, 580px); min-height: 185px; padding: 28px 22px; border-radius: 34px; background: rgba(255,255,255,.76); border: 1px solid rgba(255,255,255,.72); box-shadow: 0 26px 70px rgba(100,40,7,.24); backdrop-filter: blur(12px); }
+    .day { font-size: 19px; color: #e65b16; font-weight: 1000; }
+    .date { margin-top: 6px; font-size: clamp(44px, 10vw, 72px); font-weight: 1000; letter-spacing: -0.05em; }
+    .note { margin-top: 14px; font-size: clamp(18px, 4vw, 24px); font-weight: 800; color: #6c3418; }
+    .chips { display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; margin-top: 24px; max-width: 92vw; }
+    .chip { padding: 9px 15px; border-radius: 999px; background: rgba(255,255,255,.72); color: #7b421d; font-weight: 900; box-shadow: 0 8px 20px rgba(99,45,13,.12); }
+    .chip.active { background: #ec6722; color: white; }
+    .caption { margin-top: 28px; padding: 13px 18px; border-radius: 20px; background: rgba(0,0,0,.68); color: white; font-size: clamp(16px, 4vw, 22px); font-weight: 900; box-shadow: 0 18px 40px rgba(0,0,0,.25); animation: pulseSmall 1.2s infinite ease-in-out; }
+    .fire-zone { pointer-events: none; position: absolute; left: 0; right: 0; bottom: 0; z-index: 20; height: 150px; overflow: hidden; background: linear-gradient(0deg, rgba(0,0,0,.48), transparent); }
+    .flame { position: absolute; bottom: -4px; font-size: clamp(48px, 7vw, 82px); animation: burn .9s infinite ease-in-out; transform-origin: bottom center; }
+    .turtle-zone { pointer-events: none; position: absolute; left: 0; right: 0; bottom: 18px; z-index: 28; height: 105px; overflow: hidden; }
+    .turtle { position: absolute; bottom: 22px; font-size: clamp(42px, 7vw, 70px); animation-name: turtleMove, turtleBob, turtleBurn; animation-duration: 8.4s, 1.4s, 8.4s; animation-timing-function: linear, ease-in-out, linear; animation-iteration-count: infinite, infinite, infinite; }
+    @media (max-width: 720px) { body { overflow-y: auto; } .panel { grid-template-columns: 1fr; } main { padding-top: 210px; } }
+    @keyframes pulse { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.1); opacity: 1; } }
+    @keyframes pulseSmall { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+    @keyframes burn { 0%,100% { transform: translateY(0) scale(1) rotate(-3deg); } 50% { transform: translateY(-12px) scale(1.22) rotate(4deg); } }
+    @keyframes turtleMove { from { left: 110vw; } to { left: -18vw; } }
+    @keyframes turtleBob { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-9px) rotate(5deg); } }
+    @keyframes turtleBurn { 0% { opacity: 1; filter: brightness(1); } 55% { opacity: .95; filter: brightness(.9); } 82% { opacity: .5; filter: brightness(.45); } 100% { opacity: 0; filter: brightness(.18); } }
+    .fade { animation: switchDate .45s ease; }
+    @keyframes switchDate { from { opacity: 0; transform: translateY(24px) scale(.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <input id="placeInput" value="台南" placeholder="輸入地點，例如：台南、沖繩、日本" />
+    <input id="startInput" type="date" value="2026-05-16" />
+    <input id="endInput" type="date" value="2026-05-18" />
+    <button id="applyBtn">套用</button>
+  </div>
+  <div class="bg">
+    <div class="sun">☀️</div><div class="lantern">🏮</div>    <div class="temple" id="temple" data-title="台南・旅遊燃燒中"></div>
+  </div>
+  <main>
+    <div class="tag" id="tag">TAINAN TRIP</div>
+    <h1 id="title">台南三日遊<span>燒烏龜無限循環版</span></h1>
+    <section class="card" id="card"><div class="day" id="day">DAY 1</div><div class="date" id="date">2026.05.16</div><div class="note" id="note">台南旅遊，火力全開</div></section>
+    <div class="chips" id="chips"></div>
+    <div class="caption" id="caption">🐢 日期無限循環，下面持續燒烏龜 🔥</div>
+  </main>
+  <div class="fire-zone" id="fire"></div><div class="turtle-zone" id="turtles"></div>
+<script>
+let dates = [], tick = 0, timer = null;
+const $ = (id) => document.getElementById(id);
+const placeInput = $("placeInput"), startInput = $("startInput"), endInput = $("endInput"), applyBtn = $("applyBtn");
+const tagEl = $("tag"), titleEl = $("title"), templeEl = $("temple"), dayEl = $("day"), dateEl = $("date"), noteEl = $("note"), cardEl = $("card"), chipsEl = $("chips"), captionEl = $("caption");
+function formatDate(date) { const y=date.getFullYear(), m=String(date.getMonth()+1).padStart(2,"0"), d=String(date.getDate()).padStart(2,"0"); return `${y}.${m}.${d}`; }
+function dateText(date) { return `${String(date.getMonth()+1).padStart(2,"0")}/${String(date.getDate()).padStart(2,"0")}`; }
+function getDateRange(start, end) { const result=[], current=new Date(start+"T00:00:00"), last=new Date(end+"T00:00:00"); if (current > last) return []; let i=1; while (current <= last) { result.push({ label: formatDate(current), short: dateText(current), day: `DAY ${i}` }); current.setDate(current.getDate()+1); i++; } return result; }
+function updateDate() { if (!dates.length) return; const current = dates[tick % dates.length]; dayEl.textContent = current.day; dateEl.textContent = current.label; noteEl.textContent = current.note; [...chipsEl.children].forEach((chip, i) => chip.classList.toggle("active", i === tick % dates.length)); cardEl.classList.remove("fade"); void cardEl.offsetWidth; cardEl.classList.add("fade"); tick++; }
+function buildTrip() { const place = placeInput.value.trim() || "未命名地點"; const range = getDateRange(startInput.value, endInput.value); if (!range.length) { alert("結束日期不能早於開始日期喔！"); return; } dates = range.map((d, i) => ({ ...d, note: i === 0 ? `抵達${place}，旅程開始燃燒` : i === range.length - 1 ? `最後一天，烏龜繼續燒` : `${place}旅遊中，火力全開` })); tick = 0; const dayCount = dates.length; tagEl.textContent = `${place.toUpperCase()} TRIP`; titleEl.innerHTML = `${place}${dayCount}日遊<span>燒烏龜無限循環版</span>`; templeEl.setAttribute("data-title", `${place}・旅遊燃燒中`); captionEl.textContent = `🐢 日期從 ${dates[0].short} → ${dates[dates.length - 1].short} 無限循環，下面持續燒烏龜 🔥`; chipsEl.innerHTML = ""; dates.forEach((d, i) => { const chip = document.createElement("div"); chip.className = "chip" + (i === 0 ? " active" : ""); chip.textContent = d.label; chipsEl.appendChild(chip); }); updateDate(); if (timer) clearInterval(timer); timer = setInterval(updateDate, 1800); }
+applyBtn.addEventListener("click", buildTrip);
+const fire = $("fire"); for (let i=0; i<22; i++) { const f=document.createElement("div"); f.className="flame"; f.textContent="🔥"; f.style.left=(i*5-4)+"%"; f.style.animationDelay=((i%6)*.11)+"s"; f.style.fontSize=(48+(i%5)*8)+"px"; fire.appendChild(f); }
+const turtles = $("turtles"); for (let i=0; i<5; i++) { const t=document.createElement("div"); t.className="turtle"; t.textContent="🐢"; t.style.animationDelay=(i*1.25)+"s, "+(i*.2)+"s, "+(i*1.25)+"s"; turtles.appendChild(t); }
+buildTrip();
+</script>
+</body>
+</html>
